@@ -4,15 +4,14 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-//#include "k_Haar_tranform.h"
-
 using namespace cv;
 
-const float SQRT_OF_2 = 1.414213562373095048802;
+/// 1 / sqrt(2)
+const float kInvSqrtOf2 = 0.7071067811865475244008444f;
 
 void do_Haar_decomposition_row(Mat_ <Vec3f> &output, int lim_size)
 {
-    int half_lim = std::floor(lim_size / 2.0);
+    int half_lim = std::floor(lim_size * 0.5f);
     Mat_ <Vec3f> tmp = Mat_ <Vec3f>(1, lim_size);
 
     for (int k = 0; k < lim_size; ++k) {
@@ -22,13 +21,13 @@ void do_Haar_decomposition_row(Mat_ <Vec3f> &output, int lim_size)
         }
 
         for (int i = 0; i < lim_size; ++i)
-            output(k, i) = tmp(i) / SQRT_OF_2;
+            output(k, i) = tmp(i) * kInvSqrtOf2;
     }
 }
 
 void do_Haar_decomposition_col(Mat_ <Vec3f> &output, int lim_size)
 {
-    int half_lim = std::floor(lim_size / 2.0);
+    int half_lim = std::floor(lim_size * 0.5f);
     Mat_ <Vec3f> tmp = Mat_ <Vec3f>(1, lim_size);
 
     for (int k = 0; k < lim_size; ++k) {
@@ -38,7 +37,7 @@ void do_Haar_decomposition_col(Mat_ <Vec3f> &output, int lim_size)
         }
 
         for (int i = 0; i < lim_size; ++i)
-            output(i, k) = tmp(i) / SQRT_OF_2;
+            output(i, k) = tmp(i) * kInvSqrtOf2;
     }
 }
 
@@ -74,7 +73,7 @@ int main(int argc, char **argv)
     Mat input_image = imread(argv[1], 1);
     Mat output_haar;
 
-    Haar_Decomposition(input_image, output_haar);
+    Haar_Decomposition(input_image, output_haar, false);
     imshow("Output", output_haar);
     waitKey(0);
 
