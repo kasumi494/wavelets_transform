@@ -85,8 +85,7 @@ int main(int argc, char **argv)
         pyrDown(input_image, input_image);
 
     Mat output_haar;
-
-    Haar_Decomposition(input_image, output_haar, true);
+    Haar_Decomposition(input_image, output_haar, false);
     imshow("Output", output_haar);
     waitKey(0);
 
