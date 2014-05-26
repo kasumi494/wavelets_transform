@@ -15,6 +15,15 @@ WaveletTransformator::WaveletTransformator(cv::Mat &image)
   ReduceSize(256);
 }
 
+void WaveletTransformator::Show()
+{
+  cv::Mat tmp;
+  cv::normalize(image_, tmp, 0, 255, cv::NORM_MINMAX, -1, cv::Mat());
+  tmp.convertTo(tmp, CV_8UC3);
+  imshow("Output", tmp);
+  cv::waitKey(0);
+}
+
 void WaveletTransformator::ReduceSize(int max_size)
 {
   while (image_.rows > max_size && image_.cols > max_size)
