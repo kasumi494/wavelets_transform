@@ -1,8 +1,11 @@
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include "wavelettransformator.hpp"
 
 WaveletTransformator::WaveletTransformator(std::string path)
 {
-  image_ = imread(path, 1);
+  image_ = cv::imread(path, 1);
   ReduceSize(256);
 }
 
