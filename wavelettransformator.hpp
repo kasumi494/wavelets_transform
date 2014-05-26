@@ -5,10 +5,17 @@
 
 class WaveletTransformator {
 public:
-  WaveletTransformator();
+  WaveletTransformator(std::string path);
+  WaveletTransformator(cv::Mat &image);
 
   virtual cv::Mat Decompose(bool isShow) = 0;
   virtual cv::Mat Reconstruct(bool isShow) = 0;
+
+private:
+  void ReduceSize(int max_size);
+
+  cv::Mat image_;
+  int lim_size_;
 };
 
 #endif // WAVELETTRANSFORMATOR_HPP
