@@ -1,8 +1,8 @@
 #include <cstdio>
 #include <iostream>
 
+#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
 #include "haartransformator.hpp"
 
 int main(int argc, char **argv)
@@ -14,12 +14,19 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    HaarTransformator haar(argv[1]);
+    cv::Mat original = cv::imread(argv[1], 1);
+    cv::imshow("Original", original);
 
-    cv::Mat output_haar;
-    haar.Decompose(output_haar, true);
-    cv::imshow("Output", output_haar);
+    HaarTransformator haar_1(original);
+    cv::Mat_<cv::Vec3f> output_haar;
+    haar_1.Decompose(output_haar, false);
+    cv::imshow("Decomposition", output_haar);
+
+    HaarTransformator haar_2(output_haar);
+    cv::Mat reconstruct;
+    haar_2.Reconstruct(reconstruct, true);
+    cv::imshow("Reconstruction", reconstruct);
+
     cv::waitKey(0);
-
     return 0;
 }
