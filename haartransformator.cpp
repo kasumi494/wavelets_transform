@@ -10,6 +10,7 @@ using namespace cv;
 
 /// 1 / sqrt(2)
 const float kInvSqrtOf2 = 0.7071067811865475244008443621048490393f;
+bool Compare(float i, float j) { return (fabs(i) > fabs(j)); }
 void ShowNormalized(const Mat &image);
 
 void HaarTransformator::Decompose(Mat &output, bool isShow)
@@ -33,8 +34,8 @@ void HaarTransformator::Decompose(Mat &output, bool isShow)
 void HaarTransformator::Reconstruct(Mat &output, bool isShow)
 {
   Mat_<Vec3f> tmp = image_.clone();
-  int half_cols = cvRound(image_.cols * 0.5f);
-  int half_rows = cvRound(image_.rows * 0.5f);
+  int half_cols = std::floor(image_.cols * 0.5f);
+  int half_rows = std::floor(image_.rows * 0.5f);
 
   for (int lim_size = 1; lim_size <= half_rows; lim_size *= 2) {
     do_Haar_reconstruction_col(tmp, lim_size);
@@ -51,10 +52,43 @@ void HaarTransformator::Reconstruct(Mat &output, bool isShow)
   output.convertTo(output, CV_8U);
 }
 
+void HaarTransformator::Compress(Mat_ <Vec3f> &output)
+{
+  size_t leave_count = 60;
+
+  /// Start Quantize
+  Mat reshaped_image = image_.clone();
+  reshaped_image = reshaped_image.reshape(0, 1);
+  std::vector <cv::Mat_ <float> > channels;
+  cv::split(reshaped_image, channels);
+
+  /// Get tresholds
+  float tresholds[3] = {.0f, .0f, .0f};
+  for (int i = 0; i < 3; ++i) {
+    std::vector <float> tmp;
+    channels[i].row(0).copyTo(tmp);
+    std::sort(tmp.begin(), tmp.end(), Compare);
+
+    /// First 60 coefficients (+ first: mean value)
+    tresholds[i] = fabs(tmp[leave_count]);
+  }
+
+  /// Cut by treshold
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = 0; j < channels[i].total(); ++j) {
+      float tmp = channels[i](j);
+      if (fabs(tmp) < tresholds[i]) channels[i](j) = .0f;
+    }
+  }
+
+  cv::merge(channels, output);
+  output = output.reshape(0, image_.rows);
+}
+
 void HaarTransformator::do_Haar_decomposition_row(Mat_<Vec3f> &output,
                                                   int lim_size)
 {
-  int half_lim = cvRound(lim_size * 0.5f);
+  int half_lim = std::floor(lim_size * 0.5f);
   Mat_ <Vec3f> tmp = Mat_ <Vec3f>(1, lim_size);
 
   for (int k = 0; k < output.rows; ++k) {
@@ -71,7 +105,7 @@ void HaarTransformator::do_Haar_decomposition_row(Mat_<Vec3f> &output,
 void HaarTransformator::do_Haar_decomposition_col(cv::Mat_<Vec3f> &output,
                                                   int lim_size)
 {
-  int half_lim = cvRound(lim_size * 0.5f);
+  int half_lim = std::floor(lim_size * 0.5f);
   Mat_ <Vec3f> tmp = Mat_ <Vec3f>(1, lim_size);
 
   for (int k = 0; k < output.cols; ++k) {
