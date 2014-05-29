@@ -10,7 +10,6 @@ public:
 
   virtual void Decompose(cv::Mat &output, bool isShow);
   virtual void Reconstruct(cv::Mat &output, bool isShow);
-  void Compress(cv::Mat_<cv::Vec3f> &output, size_t leave_count);
 
 private:
   void do_Haar_decomposition_row(cv::Mat_<cv::Vec3f> &output, int lim_size);

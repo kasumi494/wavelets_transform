@@ -11,6 +11,7 @@ public:
 
   virtual void Decompose(cv::Mat &output, bool isShow) = 0;
   virtual void Reconstruct(cv::Mat & output, bool isShow) = 0;
+  void Compress(cv::Mat_<cv::Vec3f> &output, size_t leave_count);
 
   void Show();
 
