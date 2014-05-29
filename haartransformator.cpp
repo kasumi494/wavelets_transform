@@ -10,6 +10,7 @@ using namespace cv;
 
 /// 1 / sqrt(2)
 const float kInvSqrtOf2 = 0.7071067811865475244008443621048490393f;
+bool Compare(float i, float j) { return (fabs(i) > fabs(j)); }
 void ShowNormalized(const Mat &image);
 
 void HaarTransformator::Decompose(Mat &output, bool isShow)
@@ -49,6 +50,37 @@ void HaarTransformator::Reconstruct(Mat &output, bool isShow)
   tmp *= sqrt(image_.total());
   normalize(tmp, output, 0, 255, cv::NORM_MINMAX, -1, cv::Mat());
   output.convertTo(output, CV_8U);
+}
+
+void HaarTransformator::Compress(cv::Mat_<Vec3f> &output, size_t leave_count)
+{
+  /// Start Quantize
+  Mat reshaped_image = image_.clone();
+  reshaped_image = reshaped_image.reshape(0, 1);
+  std::vector <cv::Mat_ <float> > channels;
+  cv::split(reshaped_image, channels);
+
+  /// Get tresholds
+  float tresholds[3] = {.0f, .0f, .0f};
+  for (int i = 0; i < 3; ++i) {
+    std::vector <float> tmp;
+    channels[i].row(0).copyTo(tmp);
+    std::sort(tmp.begin(), tmp.end(), Compare);
+
+    /// First 60 coefficients (+ first: mean value)
+    tresholds[i] = fabs(tmp[leave_count]);
+  }
+
+  /// Cut by treshold
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = 0; j < channels[i].total(); ++j) {
+      float tmp = channels[i](j);
+      if (fabs(tmp) < tresholds[i]) channels[i](j) = .0f;
+    }
+  }
+
+  cv::merge(channels, output);
+  output = output.reshape(0, image_.rows);
 }
 
 void HaarTransformator::do_Haar_decomposition_row(Mat_<Vec3f> &output,
@@ -98,7 +130,7 @@ void HaarTransformator::do_Haar_reconstruction_row(cv::Mat_<Vec3f> &output,
     }
 
     for (int k = 0; k < double_size; ++k)
-      output(i, k) = tmp(k)* kInvSqrtOf2;
+      output(i, k) = tmp(k) * kInvSqrtOf2;
   }
 }
 
@@ -117,13 +149,4 @@ void HaarTransformator::do_Haar_reconstruction_col(cv::Mat_<Vec3f> &output,
     for (int k = 0; k < double_size; ++k)
       output(k, i) = tmp(k) * kInvSqrtOf2;
   }
-}
-
-void ShowNormalized(const Mat &image)
-{
-  cv::Mat tmp;
-  cv::normalize(image, tmp, 0, 255, cv::NORM_MINMAX, -1, cv::Mat());
-  tmp.convertTo(tmp, CV_8UC3);
-  imshow("Output", tmp);
-  waitKey(0);
 }
