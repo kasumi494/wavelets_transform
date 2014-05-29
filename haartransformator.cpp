@@ -52,10 +52,8 @@ void HaarTransformator::Reconstruct(Mat &output, bool isShow)
   output.convertTo(output, CV_8U);
 }
 
-void HaarTransformator::Compress(Mat_ <Vec3f> &output)
+void HaarTransformator::Compress(Mat_ <Vec3f> &output, size_t leave_count)
 {
-  size_t leave_count = 60;
-
   /// Start Quantize
   Mat reshaped_image = image_.clone();
   reshaped_image = reshaped_image.reshape(0, 1);
@@ -151,13 +149,4 @@ void HaarTransformator::do_Haar_reconstruction_col(cv::Mat_<Vec3f> &output,
     for (int k = 0; k < double_size; ++k)
       output(k, i) = tmp(k) * kInvSqrtOf2;
   }
-}
-
-void ShowNormalized(const Mat &image)
-{
-  cv::Mat tmp;
-  cv::normalize(image, tmp, 0, 255, cv::NORM_MINMAX, -1, cv::Mat());
-  tmp.convertTo(tmp, CV_8UC3);
-  imshow("Output", tmp);
-  waitKey(0);
 }

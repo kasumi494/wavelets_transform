@@ -16,6 +16,7 @@ public:
 
 protected:
   void ReduceSize(int max_size);
+  void ShowNormalized(const cv::Mat &image);
 
   cv::Mat image_;
 };
