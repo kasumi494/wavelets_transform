@@ -5,11 +5,13 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     wavelettransformator.cpp \
-    haartransformator.cpp
+    haartransformator.cpp \
+    daubechiestransformator.cpp
 
 HEADERS += \
     wavelettransformator.hpp \
-    haartransformator.hpp
+    haartransformator.hpp \
+    daubechiestransformator.hpp
 
 
 unix: CONFIG += link_pkgconfig
