@@ -3,7 +3,20 @@
 
 #include "wavelettransformator.hpp"
 
-bool Compare(float i, float j) { return (fabs(i) > fabs(j)); }
+bool GetMin(float i, float j) { return (fabs(i) < fabs(j)); }
+bool GetMax(float i, float j) { return (fabs(i) > fabs(j)); }
+
+void partial_sort(std::vector<float> &array, int max_count)
+{
+  std::vector <float>::iterator itMax;
+  std::vector <float>::iterator it = array.begin();
+  std::vector <float>::iterator it_end = array.end();
+
+  for (int i = 0; i < max_count; ++i, ++it) {
+    itMax = std::max_element(it, it_end, GetMin);
+    std::swap(*itMax, *it);
+  }
+}
 
 WaveletTransformator::WaveletTransformator(std::string path)
 {
@@ -31,7 +44,9 @@ void WaveletTransformator::Compress(cv::Mat_<cv::Vec3f> &output,
   for (int i = 0; i < 3; ++i) {
     std::vector <float> tmp;
     channels[i].row(0).copyTo(tmp);
-    std::sort(tmp.begin(), tmp.end(), Compare);
+
+    if (leave_count < 100)  partial_sort(tmp, leave_count + 1);
+    else  std::sort(tmp.begin(), tmp.end(), GetMax);
 
     /// First 60 coefficients (+ first: mean value)
     tresholds[i] = fabs(tmp[leave_count]);

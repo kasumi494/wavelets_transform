@@ -6,6 +6,64 @@
 #include "haartransformator.hpp"
 #include "daubechiestransformator.hpp"
 
+cv::Mat original;
+int threshval = 5000;
+
+void MakeD2();
+void MakeD4();
+
+void MakeD2()
+{
+  HaarTransformator decompositor(original);
+  cv::Mat_<cv::Vec3f> decomposed;
+  decompositor.Decompose(decomposed, false);
+
+  HaarTransformator compressor(decomposed);
+  compressor.Compress(decomposed, threshval);
+//  cv::imshow("Compressed", decomposed);
+
+  HaarTransformator reconstructor(decomposed);
+  cv::Mat reconstruct;
+  reconstructor.Reconstruct(reconstruct, false);
+  cv::imshow("D2 Transform", reconstruct);
+}
+
+void MakeD4()
+{
+  D4Transformator decompositor(original);
+  cv::Mat_<cv::Vec3f> decomposed;
+  decompositor.Decompose(decomposed, false);
+
+  D4Transformator compressor(decomposed);
+  compressor.Compress(decomposed, threshval);
+//  cv::imshow("Compressed", decomposed);
+
+  D4Transformator reconstructor(decomposed);
+  cv::Mat reconstruct;
+  reconstructor.Reconstruct(reconstruct, false);
+  cv::imshow("D4 Transform", reconstruct);
+}
+
+static void on_trackbar_d4(int, void*)
+{
+  if (threshval < 2) threshval = 2;
+  cv::setTrackbarPos("leaved", "D2 Transform", threshval);
+
+  MakeD2();
+  MakeD4();
+}
+
+static void on_trackbar_d2(int, void*)
+{
+  if (threshval < 2) threshval = 2;
+  cv::setTrackbarPos("leaved", "D4 Transform", threshval);
+
+  MakeD2();
+  MakeD4();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **argv)
 {
   if (argc < 3) {
@@ -14,35 +72,16 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  cv::Mat original = cv::imread(argv[1], 1);
-  cv::imshow("Original", original);
+  original = cv::imread(argv[1], 1);
 
-  D4Transformator d4_1(original);
-  cv::Mat_<cv::Vec3f> output_d4;
-  d4_1.Decompose(output_d4, false);
+  cv::namedWindow("D2 Transform", 1);
+  cv::createTrackbar("leaved", "D2 Transform", &threshval,
+                     threshval, on_trackbar_d2);
 
-  D4Transformator compressed_d4(output_d4);
-  compressed_d4.Compress(output_d4, (size_t)atoi(argv[2]));
-//  cv::imshow("Compressed", output_d4);
-
-  D4Transformator d4_2(output_d4);
-  cv::Mat reconstruct_d4;
-  d4_2.Reconstruct(reconstruct_d4, false);
-  cv::imshow("Reconstruction D4", reconstruct_d4);
-
-
-  HaarTransformator haar_1(original);
-  cv::Mat_<cv::Vec3f> output_haar;
-  haar_1.Decompose(output_haar, false);
-
-  HaarTransformator haar_compressed(output_haar);
-  haar_compressed.Compress(output_haar, (size_t)atoi(argv[2]));
-//  cv::imshow("Compressed", output_haar);
-
-  HaarTransformator haar_2(output_haar);
-  cv::Mat reconstruct;
-  haar_2.Reconstruct(reconstruct, false);
-  cv::imshow("Reconstruction D2", reconstruct);
+  cv::namedWindow("D4 Transform", 1);
+  cv::createTrackbar("leaved", "D4 Transform", &threshval,
+                     threshval, on_trackbar_d4);
+  on_trackbar_d4(threshval, 0);
 
   cv::waitKey(0);
   return 0;
