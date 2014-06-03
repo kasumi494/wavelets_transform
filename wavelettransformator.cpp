@@ -3,10 +3,10 @@
 
 #include "wavelettransformator.hpp"
 
-bool GetMin(float i, float j) { return (fabs(i) < fabs(j)); }
-bool GetMax(float i, float j) { return (fabs(i) > fabs(j)); }
+static bool GetMin(float i, float j) { return (fabs(i) < fabs(j)); }
+static bool GetMax(float i, float j) { return (fabs(i) > fabs(j)); }
 
-void partial_sort(std::vector<float> &array, int max_count)
+static void partial_sort(std::vector<float> &array, int max_count)
 {
   std::vector <float>::iterator itMax;
   std::vector <float>::iterator it = array.begin();
